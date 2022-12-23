@@ -1,18 +1,16 @@
-style>
-       body {
-           background-color: #EAF6F6;
-       }
+body {
+    background-color: #FFD4B2;
+   }
+hr {
+    border-style: none;
+    border-top-style: dotted;
+    border-width: 5px;
+    width: 20%;
+}
+img {
+    height: 200px;
+}
 
-       hr {
-           border-style: none;
-           border-top-style: dotted;
-           borser-shape: circle;
-           border-color: grey;
-           border-width: 5px;
-           width: 30%;
-       }
-
-       img {
-           height: 200px;
-       }
-   </style>
+h3 {
+    color: #86C8BC
+}
