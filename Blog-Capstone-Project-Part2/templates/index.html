@@ -6,6 +6,7 @@
         <!-- Navigation-->
         {% include "navigation.html" %}
         <!-- Page Header-->
+        <br>
         <header class="masthead" style="background-image: url({{url_for('static', filename='assets/img/home-bg.jpg')}})">
             <div class="container position-relative px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -25,7 +26,7 @@
                     <!-- Post preview-->
                     {% for post in data: %}
                     <div class="post-preview">
-                        <a href="post.page">
+                        <a href="{{url_for('create_post_page', id=post['id'])}}">
                             <h2 class="post-title">{{post['title']}}</h2>
                             <h3 class="post-subtitle">{{post['subtitle']}}</h3>
                         </a>
@@ -37,6 +38,7 @@
                     </div>
                     <!-- Divider-->
                     <hr class="my-4" />
+                    <br>
                     {% endfor %}
         <!-- Footer-->
         {% include "footer.html" %}
