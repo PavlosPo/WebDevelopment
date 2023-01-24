@@ -1,35 +1,42 @@
 body {
     font-family: "Montserat";
+    text-align: center;
 }
 
 #title {
   background-color: #ff4c68;
+  text-align: left;
   color: #fff;
 }
 
-h1 {
-  font-family: "Montserrat-Black";
-  font-size: 3.5rem;
-  line-height: 1.5;
-}
-
-h2 {
-  font-family: "Montserat-Bold";
-  font-size: 3rem;
-  line-height: 1.5;
-}
-
-h3 {
-  font-family: "Montserat-Bold"
-  font-size: 1.5rem;
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Montserrat-Bold";
 }
 
 p {
   color: #8f8f8f;
 }
 
+.price-text {
+  font-size: 3rem;
+  line-height: 1.5;
+}
+
+/* Headings */
+
+.big-heading {
+  font-family: "Montserrat-Bold";
+  font-size: 3.5rem;
+  line-height: 1.5;
+}
+
+.section-heading{
+  font-size: 3rem;
+  line-height: 1.5;
+}
+
 .container-fluid{
-  padding: 3% 15% 7%;
+  padding: 7% 15%;
 }
 
 /* Navigation Bar */
@@ -55,6 +62,8 @@ p {
 
 /* Download Buttons */
 
+
+
 .download-button {
   margin: 5% 3% 5% 0%;
 }
@@ -71,13 +80,19 @@ p {
 
 /* Features */
 #features {
-  padding: 7% 15%;
+
   background-color: #fff;
   position: relative;
 }
 .features-box {
   text-align: center;
   padding: 5%
+}
+
+.features-title{
+font-family: "Montserat-Black";
+font-size: 3.5rem;
+line-height: 1.5;
 }
 
 .icon {
@@ -92,9 +107,12 @@ p {
 /* Testimonials */
 
 #testimonials {
-  text-align: center;
   background-color: #ef8172;
   color: #fff;
+}
+.testimonial-text{
+  font-size: 3rem;
+  line-height: 1.5;
 }
 
 .testimonial-image {
@@ -109,7 +127,6 @@ p {
 
 #press {
   background-color: #ef8172;
-  text-align: center;
   padding-bottom: 3%
 }
 
@@ -122,10 +139,43 @@ p {
 
 #pricing {
   padding: 100px;
-  text-align: center;
 }
 
 
 .pricing-column {
   padding: 3% 2%;
+}
+
+/* CTA Section */
+
+#cta {
+  background-color: #ff4c68;
+}
+
+#cta h3 {
+  color: #fff;
+  font-size: 3rem;
+}
+
+/* Footer Section */
+
+#footer {
+  background-color: #fff;
+}
+
+.social-icon {
+  margin: 20px 10px;
+}
+@media (max-width: 1028px) {
+
+  #title {
+    text-align: center;
+  }
+
+  .title-image{
+    position:static;
+    transform: rotate(0);
+  }
+
+
 }
