@@ -5,6 +5,7 @@ import datetime
 app = Flask(__name__)
 api_endpoint = "https://api.npoint.io/f8151ab1f10f7e9cf7a8"
 
+
 # Get data from dumb API
 def api_brain(id=None):
     if id is None:
@@ -18,6 +19,11 @@ def api_brain(id=None):
         specific_post = [post for post in data if int(post['id']) == int(id)][0]
         return specific_post
     return data
+
+
+# Send email to myself
+def send_email(message):
+    pass
 
 
 @app.route("/")
@@ -51,21 +57,24 @@ def create_post_page(id):
 # Receive POST and GET Requests for Contact Page
 @app.route("/contact", methods=["GET", "POST"])
 def contact_page():
-
+    # If you are just visiting the Contact Page
     if request.method == "GET":
-        # If you are just visiting the Contact Page
-        return render_template("contact.html")
+        # Doesn't Change state of Contact Page
+        post_request_happened = False
+        return render_template("contact.html",
+                               post_request_happened=post_request_happened)
 
+    # If you are sending a completed form on Contact Page
     elif request.method == "POST":
-        # If you are sending a completed form on Contact Page
         name = request.form["name"]
         email = request.form["email"]
         message = request.form["message"]
-        if request.method == "POST":
-            return f"<h1>Succesfully Send your Form!</h1>" \
-                   f"Name: {name}" \
-                   f"Email: {email}" \
-                   f"Message {message}"
+        # Send the email
+        send_email(message)
+        # Change state of Contact Page After Sending the email
+        post_request_happened = True
+        return render_template("contact.html",
+                               post_request_happened=post_request_happened)
 
 
 if __name__ == "__main__":

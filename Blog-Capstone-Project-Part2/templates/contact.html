@@ -11,8 +11,12 @@
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-md-10 col-lg-8 col-xl-7">
                         <div class="page-heading">
-                            <h1>Contact Me</h1>
-                            <span class="subheading">Have questions? I have answers.</span>
+                            {% if post_request_happened: %}
+                                <h1>Succesfully Sended the Form!</h1>
+                            {% else: %}
+                                <h1>Contact</h1>
+                                <span class="subheading">Have questions? I have answers.</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -57,14 +61,5 @@
         </main>
         <!-- Footer-->
         {% include "footer.html" %}
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Core theme JS-->
-        <script src='{{url_for("static", filename="js/scripts.js")}}'></script>
-        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
-        <!-- * *                               SB Forms JS                               * *-->
-        <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
-        <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
-        <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
     </body>
 </html>
