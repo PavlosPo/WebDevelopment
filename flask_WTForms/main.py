@@ -1,12 +1,18 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms.validators import DataRequired, Email, Length
+from flask_bootstrap import Bootstrap
 
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    Bootstrap(app)
+    app.secret_key = '5f18d396d4038e7b684543b2f2b79af4'
+    return app
 
-app.secret_key = '5f18d396d4038e7b684543b2f2b79af4'
+
+app = create_app()
 
 
 # Class for Flask WTForms

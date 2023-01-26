@@ -1,9 +1,19 @@
-<!DOCTYPE HTML>
+{% extends "bootstrap/base.html" %}
 
-<html>
-	<head>
-		<title>Login</title>
-	</head>
+{% block title %}
+	Login Page
+{% endblock %}
+
+{% block head %}  {#On the head atribute we add the included CSS#}
+	{{super()}}
+	<style>
+		body {
+			background-color:yellow;
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
 	<body>
         <div class="container">
 		<h1>Login</h1>
@@ -31,4 +41,4 @@
 		</form>
         </div>
 	</body>
-</html>
+{% endblock %}
