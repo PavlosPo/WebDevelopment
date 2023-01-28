@@ -1,5 +1,10 @@
 {% extends 'bootstrap/base.html' %}
 
+{% block styles %}
+{{ super() }}
+<link href="{{url_for('static', filename='css/styles.css')}}" rel="stylesheet">
+{% endblock %}
+
 {% block title %}Restaurants{% endblock %}
 
 {% block content %}
@@ -10,10 +15,9 @@
 
       <h1>All Cafes</h1>
 
-	  <table class="table table-striped">
+	  <table class="table">
           <thead>
             <tr>
-              <th scope="col">#</th>
                 {# This only iterrate on the first row of csv data, where the headings/column names are #}
                 {% for head_column in cafes[0]: %}
                     <th scope="col">{{head_column}}</th>
@@ -23,19 +27,18 @@
           <tbody>
           {% for table_row in cafes[1:]: %}
             <tr>
-              <th scope="row">{{loop.index}}</th>
               {% for table_row_column_data in table_row: %}
                     {% if table_row_column_data.startswith('https://'): %}
-                        <td><a href="{{table_row_column_data}}" target="_blank">Maps Link</a></td>
+                        <td><p><a href="{{table_row_column_data}}" target="_blank">Maps Link</a></p></td>
                     {% else: %}
-                        <td>{{table_row_column_data}}</td>
+                        <td><p>{{table_row_column_data}}</p></td>
                     {% endif %}
                 {% endfor %}
             {% endfor %}
           </tbody>
       </table>
 
-      <p><a href="#">Return to index page</a></p>
+      <p><a href="{{url_for('home')}}">Return to index page</a></p>
 
     </div>
   </div>
