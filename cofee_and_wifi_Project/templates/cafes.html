@@ -1,0 +1,44 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}Restaurants{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+
+      <h1>All Cafes</h1>
+
+	  <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+                {# This only iterrate on the first row of csv data, where the headings/column names are #}
+                {% for head_column in cafes[0]: %}
+                    <th scope="col">{{head_column}}</th>
+                {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+          {% for table_row in cafes[1:]: %}
+            <tr>
+              <th scope="row">{{loop.index}}</th>
+              {% for table_row_column_data in table_row: %}
+                    {% if table_row_column_data.startswith('https://'): %}
+                        <td><a href="{{table_row_column_data}}" target="_blank">Maps Link</a></td>
+                    {% else: %}
+                        <td>{{table_row_column_data}}</td>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+          </tbody>
+      </table>
+
+      <p><a href="#">Return to index page</a></p>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
