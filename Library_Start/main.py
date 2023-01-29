@@ -1,8 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for
+import sqlite3
+
 
 app = Flask(__name__)
-
 all_books = []
+
+
+db = sqlite3.connect("books-collection.db")
+cursor = db.cursor()  # It modifies, creates, interact with the files
+cursor.execute("CREATE TABLE books (id INTEGER PRIMARY KEY, title varchar(250) NOT NULL UNIQUE, author varchar(250) NOT NULL, rating FLOAT NOT NULL)")
 
 
 @app.route('/')
