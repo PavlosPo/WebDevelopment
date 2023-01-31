@@ -75,13 +75,25 @@ def add():
         return render_template('add.html')
 
 
-@app.route('/change_rating/<id>')
+@app.route('/change_rating/<id>', methods=['GET', 'POST'])
 def change_rating(id):
-    print(id)
-    current_book = db.session.get(id=id)
-    new_rating = None
-    current_book.rating = new_rating
-    print(current_book)
+    current_book = db.session.query(Book).filter_by(id=id).first()
+    if request.method == 'GET':
+        return render_template('changing_rating.html', book=current_book)
+    if request.method == "POST":
+        new_rating = request.form.get('new_rating')
+        current_book.rating = new_rating
+        db.session.commit()
+        return redirect(url_for('home'))
+
+
+@app.route('/delete')
+def delete():
+    book_id = request.args.get('id')
+    # DELETE A RECORD BY ID
+    book_to_delete = Book.query.get(book_id)
+    db.session.delete(book_to_delete)
+    db.session.commit()
     return redirect(url_for('home'))
 
 

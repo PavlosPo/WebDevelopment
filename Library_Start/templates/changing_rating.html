@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Changing Rating of {{book.title}}</title>
+</head>
+<body>
+    <h1>Changing Rating of {{book.title}}</h1>
+    <form method="POST" novalidate>
+        <label>Current Rating: {{book.rating}}</label>
+        <input name="new_rating" placeholder="New Rating">
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>

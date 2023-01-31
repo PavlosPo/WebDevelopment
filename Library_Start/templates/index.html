@@ -11,11 +11,17 @@
         {% else: %}
             <ul>
                 {% for book in all_books: %}
-                    <li>{{book.title}} - {{book.author}} - {{book.rating}}/10 <a href="{{url_for('change_rating', id=book.id)}}">Edit Rating</a></li>
+                <span>
+                    <li>
+                        <span><a href="{{url_for('delete', id=book.id)}}">Delete</a></span>
+                            {{book.title}} - {{book.author}} - {{book.rating}}/10
+                        <span><a href="{{url_for('change_rating', id=book.id, )}}">Edit Rating</a></span>
+                    </li>
+                </span>
                 {% endfor %}
             </ul>
         {% endif %}
 
-<a href="">Add New Book</a>
+<a href="{{url_for('add')}}">Add New Book</a>
 </body>
 </html>
