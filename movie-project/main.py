@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, IntegerRangeField
+from wtforms import StringField, SubmitField, IntegerField, IntegerRangeField, FloatField
 from wtforms.validators import DataRequired
 import requests
 import os
@@ -60,7 +60,6 @@ with app.app_context():
         img_url = db.Column(db.String, nullable=True)
 
         def __init__(self, title, year, description, rating, ranking, review, img_url):
-            self.id = id
             self.title = title
             self.year = year
             self.description = description
@@ -87,7 +86,7 @@ with app.app_context():
 
 # Form to Update Rating or Review
 class RateMovieForm(FlaskForm):  # Form
-    new_rating = IntegerField(label="Your Rating Out of 10 e.g. 7.5", validators=[DataRequired()])
+    new_rating = FloatField(label="Your Rating Out of 10 e.g. 7.5", validators=[DataRequired()])
     new_review = StringField(label='Your Review', validators=[DataRequired()])
     submit = SubmitField(label='Done')
 
@@ -116,7 +115,7 @@ def update():
 
     if form.validate_on_submit():
         movie.rating = form.new_rating.data
-        movie.description = form.new_review.data
+        movie.review = form.new_review.data
         db.session.commit()
         return redirect(url_for('home'))
     return render_template('edit.html', movie=movie, form=form)
@@ -158,7 +157,7 @@ def fetch_movie_data_and_add():
         review='None',  # We initializing as None
         rating=0,  # Initializing as 0
         ranking=movie_to_add_data['vote_average'],
-        img_url='https://image.tmdb.org/t/p/original' + movie_to_add_data['poster_path']
+        img_url='https://image.tmdb.org/t/p/original' + str(movie_to_add_data['poster_path'])
     )
 
     db.session.add(movie_to_add)
