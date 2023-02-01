@@ -17,11 +17,11 @@ db = SQLAlchemy(app)
 
 
 # API for data extraction after adding or searching a movie
-def search_movie(movie_title, movie_id=None):
+def search_movie(movie_title=None, movie_id=None):
     """If Movie title is given, it finds all the results,
     else if Id of a Movie is given, it returns all the data of that movie id"""
 
-    if movie_id is None:
+    if movie_id is None and movie_title is not None:
         API_ENDPOINT = 'https://api.themoviedb.org/3/search/movie'
         params = {
             'api_key': API_KEY,
@@ -32,18 +32,19 @@ def search_movie(movie_title, movie_id=None):
         response.raise_for_status()
         data = response.json()
         return data
-    else:
-        API_ENDPOINT = f'https://api.themoviedb.org/3/search/movie/{movie_id}'
+    elif (movie_id is not None) and (movie_title is None):
+        API_ENDPOINT = f'https://api.themoviedb.org/3/movie/{movie_id}'
         params = {
-            'api_key': API_KEY,
-            'language': 'en-US'
+            'api_key': API_KEY
         }
         response = requests.get(url=API_ENDPOINT, params=params)
-        print(response)
         response.raise_for_status()
         data = response.json()
         print(data)
         return data
+    else:
+        print('You can not enter Both Movie Title and Movie Id. You are on different functionalities.')
+        return 0
 
 
 # DataBase Initializing
@@ -139,7 +140,7 @@ def add_movie():
     form = FormForMovieFinder()
     if form.validate_on_submit():
         movie_to_find = form.title.data
-        data = search_movie(movie_to_find)['results']
+        data = search_movie(movie_title=movie_to_find)['results']
         print(data)
         return render_template('select.html', options=data)
     return render_template('add.html', form=form)
@@ -148,12 +149,20 @@ def add_movie():
 # Fetch Movie Data and Add this to DataBase
 @app.route('/fetch_data/')
 def fetch_movie_data_and_add():
-
     movie_to_add_id = request.args.get('movie_selected_id')
-    print(movie_to_add_id)
-    movie_to_add = search_movie(movie_to_add_id)
-    print(movie_to_add)
-    # db.session.add()
+    movie_to_add_data = search_movie(movie_id=movie_to_add_id)
+    movie_to_add = Movie(
+        title=movie_to_add_data['title'],
+        year=movie_to_add_data['release_date'].split("-")[0],
+        description=movie_to_add_data['overview'],
+        review='None',  # We initializing as None
+        rating=0,  # Initializing as 0
+        ranking=movie_to_add_data['vote_average'],
+        img_url='https://image.tmdb.org/t/p/original' + movie_to_add_data['poster_path']
+    )
+
+    db.session.add(movie_to_add)
+    db.session.commit()
     return redirect(url_for('home'))
 
 
