@@ -58,8 +58,9 @@ with app.app_context():
         ranking = db.Column(db.Integer, nullable=False)
         review = db.Column(db.String(250), nullable=True)
         img_url = db.Column(db.String, nullable=True)
+        api_id = db.Column(db.Integer, nullable=True)
 
-        def __init__(self, title, year, description, rating, ranking, review, img_url):
+        def __init__(self, title, year, description, rating, ranking, review, img_url, api_id=None):
             self.title = title
             self.year = year
             self.description = description
@@ -67,21 +68,10 @@ with app.app_context():
             self.ranking = ranking
             self.review = review
             self.img_url = img_url
+            self.api_id = api_id
 
 
     db.create_all()
-    ### Import Once this Data
-    # new_movie = Movie(
-    #     title="Phone Booth",
-    #     year=2002,
-    #     description="Publicist Stuart Shepard finds himself trapped in a phone booth, pinned down by an extortionist's sniper rifle. Unable to leave or receive outside help, Stuart's negotiation with the caller leads to a jaw-dropping climax.",
-    #     rating=7.3,
-    #     ranking=10,
-    #     review="My favourite character was the caller.",
-    #     img_url="https://image.tmdb.org/t/p/w500/tjrX2oWRCM3Tvarz38zlZM7Uc10.jpg")
-    #
-    # db.session.add(new_movie)
-    # db.session.commit()
 
 
 # Form to Update Rating or Review
@@ -101,7 +91,9 @@ class FormForMovieFinder(FlaskForm):
 # Home Page
 @app.route("/")
 def home():
-    movie_table = Movie.query.all()  # Get the Movie Table
+    # Query the movies based on rating ( Higher to Lower )
+    movie_table = Movie.query.order_by(Movie.rating.desc()).all()  # Get the Movie Table in order by rating desc
+    # Render the movies
     return render_template("index.html", all_movies=movie_table)
 
 
@@ -139,8 +131,8 @@ def add_movie():
     form = FormForMovieFinder()
     if form.validate_on_submit():
         movie_to_find = form.title.data
+        # Data are fetched from an API
         data = search_movie(movie_title=movie_to_find)['results']
-        print(data)
         return render_template('select.html', options=data)
     return render_template('add.html', form=form)
 
@@ -148,8 +140,8 @@ def add_movie():
 # Fetch Movie Data and Add this to DataBase
 @app.route('/fetch_data/')
 def fetch_movie_data_and_add():
-    movie_to_add_id = request.args.get('movie_selected_id')
-    movie_to_add_data = search_movie(movie_id=movie_to_add_id)
+    movie_to_add_api_id = request.args.get('movie_selected_id')
+    movie_to_add_data = search_movie(movie_id=movie_to_add_api_id)
     movie_to_add = Movie(
         title=movie_to_add_data['title'],
         year=movie_to_add_data['release_date'].split("-")[0],
@@ -157,12 +149,18 @@ def fetch_movie_data_and_add():
         review='None',  # We initializing as None
         rating=0,  # Initializing as 0
         ranking=movie_to_add_data['vote_average'],
-        img_url='https://image.tmdb.org/t/p/original' + str(movie_to_add_data['poster_path'])
+        img_url='https://image.tmdb.org/t/p/original' + str(movie_to_add_data['poster_path']),
+        api_id=movie_to_add_api_id  # We add this so we can relation this new movie with our datbase later
     )
 
     db.session.add(movie_to_add)
     db.session.commit()
-    return redirect(url_for('home'))
+
+    # Read the movie id that was assigned to the new movie in our datbase,
+    # and push it to the update page so we can add a review and rating
+    resently_added_movie = db.session.query(Movie).filter_by(api_id=movie_to_add_api_id).first()
+    # Redirect the recently added movie for an update in rating, review with the id got from the database
+    return redirect(url_for('update', movie_id=resently_added_movie.id))
 
 
 if __name__ == '__main__':
