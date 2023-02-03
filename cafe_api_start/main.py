@@ -83,7 +83,7 @@ def add_cafe():
 
 
 ## HTTP PUT/PATCH - Update Record
-@app.route('/update-price/<cafe_id>')
+@app.route('/update-price/<cafe_id>', methods=['PATCH'])
 def update_price(cafe_id):
     new_price = request.args.get("new_price")
     cafe = db.session.query(Cafe).get(cafe_id)
@@ -95,9 +95,22 @@ def update_price(cafe_id):
         return jsonify(error={"Not Found": "Sorry a cafe with that id was not found in the database."}), 404
 
 
-
-
 ## HTTP DELETE - Delete Record
+@app.route('/report-closed/<cafe_id>', methods=["DELETE"])
+def delete_cafe(cafe_id):
+    api_key_received = request.args.get('api-key')
+    print(cafe_id)
+    all_ids = [id[0] for id in db.session.query(Cafe.id).all()]
+    if api_key_received == 'TopSecretAPIKey':
+        cafe = db.session.query(Cafe).get(cafe_id)
+        if cafe:
+            db.session.delete(cafe)
+            db.session.commit()
+            return jsonify(Success=f"Succesfully deleted the Cafeteria with cafe_id={cafe_id}"), 200
+        else:
+            return jsonify(error="Sorry a cafe with that id was not found in the database."), 404
+    else:
+        return jsonify(error="Sorry, that's not allowed. Make sure you have the correct api_key."), 403
 
 
 if __name__ == '__main__':
