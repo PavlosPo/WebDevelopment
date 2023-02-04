@@ -79,6 +79,14 @@ def new_post():
     return render_template('make-post.html', form=form)
 
 
+@app.route("/delete/<post_id>")
+def delete_post(post_id):
+    post_to_delete = db.session.query(BlogPost).get(post_id)
+    db.session.delete(post_to_delete)
+    db.session.commit()
+    return redirect(url_for('get_all_posts'))
+
+
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
