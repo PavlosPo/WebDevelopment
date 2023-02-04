@@ -63,6 +63,11 @@ def about():
     return render_template("about.html")
 
 
+@app.route("/profile")
+def profile():
+    return render_template("profile.html")
+
+
 @app.route("/new-post", methods=["GET", "POST"])
 def new_post():
     form = CreatePostForm()
