@@ -63,20 +63,28 @@ def home():
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
-    global current_user
     # register_form = RegisterForm()
     # if register_form.validate_on_submit():
     #     print("Sucess")
     # return render_template("register.html", form=register_form)
     if request.method == "POST":
         current_email = request.form.get('email')
+        # If the email already exists in database, return a flash message
+        if db.session.query(User).filter_by(email=current_email).first():
+            # The email Exists
+            # Return Message and redirect to home page
+            flash("The email already exists in our Database! Please Log in.")
+            return redirect(url_for('home'))
+        # Create hashed password from given one
         current_password_secured = generate_password_hash(
-            request.form.get('password'),
-            method="pbkdf2:sha256",
-            salt_length=8)
+                request.form.get('password'),
+                method="pbkdf2:sha256",
+                salt_length=8)
+        # Create the new user
         new_user = User(name=request.form.get('name'),
                         email=current_email,
                         password=current_password_secured)
+        # Commit to database
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
@@ -92,11 +100,17 @@ def login():
 
         # Find user by email entered.
         user = User.query.filter_by(email=email).first()
+        if user is None:
+            flash('The email provided does not exist in our database.')
+            return redirect(url_for('login'))
 
         # Check stored password hash against entered password hashed.
         if check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('secrets'))
+        else:
+            flash('You entered a wrong password! Try again.')
+            return redirect(url_for('login'))
 
 
     # # Check the form is submited to login
