@@ -129,6 +129,7 @@ def login():
 
 
 @app.route('/secrets')
+@login_required
 def secrets():
     name = current_user.name
     return render_template("secrets.html", user_name=name)
@@ -136,10 +137,12 @@ def secrets():
 
 @app.route('/logout')
 def logout():
-    pass
+    logout_user()
+    return redirect(url_for('home'))
 
 
 @app.route('/download', methods=["GET"])
+@login_required
 def download():
     return send_from_directory('static', path='/files/cheat_sheet.pdf')
 
