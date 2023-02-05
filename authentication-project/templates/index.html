@@ -3,18 +3,21 @@
 
 <div class="box">
 	<h1>Flask Authentication</h1>
-        {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <p style="color:red; align:left;">{{ message }}</p>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-  <a href="{{ url_for('login') }}" class="btn btn-primary btn-block btn-large">Login</a>
-  <a href="{{ url_for('register') }}" class="btn btn-secondary btn-block btn-large">Register</a>
-
+    {% if not current_user.is_active: %}
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class=flashes>
+          {% for message in messages %}
+            <p style="color:red; align:left;">{{ message }}</p>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+    <a href="{{ url_for('login') }}" class="btn btn-primary btn-block btn-large">Login</a>
+    <a href="{{ url_for('register') }}" class="btn btn-secondary btn-block btn-large">Register</a>
+    {% else %}
+    <p>You are Logged In! <br>Go to <i style="color:white;">/secrets</i> <br>webpage!</p>
+    {% endif %}
 </div>
 
 {% endblock %}
