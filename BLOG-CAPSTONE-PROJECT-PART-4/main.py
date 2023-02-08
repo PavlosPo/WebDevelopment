@@ -5,12 +5,11 @@ from flask_ckeditor import CKEditor
 from datetime import date
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import CreatePostForm, RegisterForm, LoginForm  # External File
-from flask_wtf import FlaskForm
 from functools import wraps
-
 from flask_gravatar import Gravatar
 
 app = Flask(__name__)
@@ -48,28 +47,38 @@ db = SQLAlchemy(app)
 
 ##CONFIGURE TABLES
 with app.app_context():
+    # Users
+    class User(UserMixin, db.Model):
+        __tablename__ = "users"
+        id = db.Column(db.Integer, primary_key=True)
+        email = db.Column(db.String(250), nullable=False)
+        password = db.Column(db.String, nullable=False)
+        name = db.Column(db.String(50), nullable=False)
+
+        # This will act like a List of BlogPost objects attached to each User.
+        # The "author" refers to the author property in the BlogPost class.
+        posts = db.relationship("BlogPost", back_populates="author")  # Child
+
     # Posts
     class BlogPost(db.Model):
         __tablename__ = "blog_posts"
         id = db.Column(db.Integer, primary_key=True)
-        author = db.Column(db.String(250), nullable=False)
+
+        # Create Foreign Key, "users.id" the users refers to the tablename of User.
+        author_id = db.Column(db.Integer, ForeignKey('users.id'))
+        # Create reference to the User object, the "posts" refers to the posts protperty in the User class.
+        author = db.relationship("User", back_populates="posts")
+
         title = db.Column(db.String(250), unique=True, nullable=False)
         subtitle = db.Column(db.String(250), nullable=False)
         date = db.Column(db.String(250), nullable=False)
         body = db.Column(db.Text, nullable=False)
         img_url = db.Column(db.String(250), nullable=False)
 
-    # Users
-    class User(UserMixin, db.Model):
-        id = db.Column(db.Integer, primary_key=True)
-        email = db.Column(db.String(250), nullable=False)
-        password = db.Column(db.String, nullable=False)
-        name = db.Column(db.String(50), nullable=False)
-
     db.create_all()
 
 
-
+##FLASK ROUTES
 @app.route('/')
 def get_all_posts():
     posts = db.session.query(BlogPost).all()
@@ -148,7 +157,7 @@ def contact():
     return render_template("contact.html")
 
 
-@app.route("/new-post")
+@app.route("/new-post", methods=["GET", "POST"])
 @login_required
 @admin_only
 def add_new_post():
