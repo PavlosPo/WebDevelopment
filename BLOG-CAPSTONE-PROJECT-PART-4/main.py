@@ -1,3 +1,4 @@
+import flask
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
@@ -8,6 +9,7 @@ from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 from forms import CreatePostForm, RegisterForm, LoginForm  # External File
 from flask_wtf import FlaskForm
+from functools import wraps
 
 from flask_gravatar import Gravatar
 
@@ -16,11 +18,23 @@ app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 ckeditor = CKEditor(app)
 Bootstrap(app)
 
+
+# Create admin-only decorator
+def admin_only(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        # if id is not 1 then return abort with 403 error
+        if current_user.id != 1:
+            return flask.abort(403)
+        else:
+            # Otherwise continue with the route function
+            return func(*args, **kwargs)
+    return decorated_function
+
+
 ## LOGIN SESSION
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
@@ -135,6 +149,8 @@ def contact():
 
 
 @app.route("/new-post")
+@login_required
+@admin_only
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -153,6 +169,8 @@ def add_new_post():
 
 
 @app.route("/edit-post/<int:post_id>")
+@login_required
+@admin_only
 def edit_post(post_id):
     post = BlogPost.query.get(post_id)
     edit_form = CreatePostForm(
@@ -175,6 +193,8 @@ def edit_post(post_id):
 
 
 @app.route("/delete/<int:post_id>")
+@login_required
+@admin_only
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get(post_id)
     db.session.delete(post_to_delete)
