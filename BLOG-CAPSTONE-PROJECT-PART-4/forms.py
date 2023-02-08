@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired, URL
 
 
 ##WTForm
+# New Post
 class CreatePostForm(FlaskForm):
     title = StringField("Blog Post Title", validators=[DataRequired()])
     subtitle = StringField("Subtitle", validators=[DataRequired()])
@@ -13,8 +14,17 @@ class CreatePostForm(FlaskForm):
     submit = SubmitField("Submit Post")
 
 
+# New User
 class RegisterForm(FlaskForm):
     email = EmailField(label='Email', validators=[DataRequired()])
     password = PasswordField(label='Password', validators=[DataRequired()])
     name = StringField(label='Name', validators=[DataRequired()])
     submit = SubmitField(label="Sign me UP!")
+
+
+# New Login
+class LoginForm(FlaskForm):
+    email = EmailField(label='Email', validators=[DataRequired()])
+    password = PasswordField(label='Password', validators=[DataRequired()])
+    submit = SubmitField(label='Log in!')
+

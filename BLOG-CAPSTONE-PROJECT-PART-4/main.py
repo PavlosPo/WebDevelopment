@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import CreatePostForm, RegisterForm  # External File
+from forms import CreatePostForm, RegisterForm, LoginForm  # External File
 from flask_wtf import FlaskForm
 
 from flask_gravatar import Gravatar
@@ -23,7 +23,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.query.get(user_id)
 
 
 ##CONNECT TO DB
@@ -46,7 +46,7 @@ with app.app_context():
         img_url = db.Column(db.String(250), nullable=False)
 
     # Users
-    class User(db.Model):
+    class User(UserMixin, db.Model):
         id = db.Column(db.Integer, primary_key=True)
         email = db.Column(db.String(250), nullable=False)
         password = db.Column(db.String, nullable=False)
@@ -66,23 +66,55 @@ def get_all_posts():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        # Add new user to DataBase
-        new_user = User(email=form.data.get('email'),
-                        password=form.data.get('password'),
-                        name=form.data.get('name'))
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('get_all_posts'))
+
+        # Search email in the database
+        search_result = db.session.query(User).filter_by(email=form.email.data).first()
+        if search_result is None:  # if the user does not allready exists
+            # Add new user to DataBase
+            new_user = User(email=form.data.get('email'),
+                            # password=form.data.get('password'),
+                            password=generate_password_hash(form.data.get('password'), salt_length=8),
+                            name=form.data.get('name'))
+            db.session.add(new_user)
+            db.session.commit()
+            # Logs the user in!
+            login_user(new_user)
+            return redirect(url_for('get_all_posts'))
+        else:
+            # Return Flash Messsage
+            flash("The email is allready in Database, Please Log In!")
+            return redirect(url_for('login'))
     return render_template("register.html", form=form)
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template("login.html")
+    form = LoginForm()
+    if form.validate_on_submit():
+        user_trying_to_login = db.session.query(User).filter_by(email=form.email.data).first()
+        # If the user Exists
+        if user_trying_to_login:
+            # Check the password
+            if check_password_hash(pwhash=user_trying_to_login.password,
+                                   password=form.password.data):
+                # Login the User!
+                login_user(user_trying_to_login)
+                flash('You are succesfully Logged In!')
+                return redirect(url_for('login'))
+            else:
+                flash('The password is not correct!')
+                return redirect(url_for('login'))
+        else:
+            flash('The email does not exists!')
+            return redirect(url_for('login'))
+
+    return render_template("login.html", form=form)
 
 
 @app.route('/logout')
+@login_required
 def logout():
+    logout_user()
     return redirect(url_for('get_all_posts'))
 
 
@@ -151,4 +183,4 @@ def delete_post(post_id):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5001, debug=True)

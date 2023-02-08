@@ -11,8 +11,12 @@
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="page-heading">
+            {% if current_user.is_active %}
+            <h1>Succesfully Logged In!</h1>
+            {% else: %}
             <h1>Log In</h1>
             <span class="subheading">Welcome Back!</span>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -21,10 +25,21 @@
 
   <div class="container">
     <div class="row">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class=flashes>
+          {% for category, message in messages %}
+            <p class="{{ category }}" style="color:red;">{{ message }}</p>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
 
+      {% if not current_user.is_active: %}
       <div class="col-lg-8 col-md-10 mx-auto content">
-        {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+            {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
       </div>
+      {% endif %}
     </div>
   </div>
 
