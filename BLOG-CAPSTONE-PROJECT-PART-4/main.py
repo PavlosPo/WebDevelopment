@@ -6,13 +6,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import CreatePostForm
+from forms import CreatePostForm, RegisterForm  # External File
+from flask_wtf import FlaskForm
+
 from flask_gravatar import Gravatar
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 ckeditor = CKEditor(app)
 Bootstrap(app)
+
+## LOGIN SESSION
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
 
 ##CONNECT TO DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
@@ -21,28 +33,47 @@ db = SQLAlchemy(app)
 
 
 ##CONFIGURE TABLES
+with app.app_context():
+    # Posts
+    class BlogPost(db.Model):
+        __tablename__ = "blog_posts"
+        id = db.Column(db.Integer, primary_key=True)
+        author = db.Column(db.String(250), nullable=False)
+        title = db.Column(db.String(250), unique=True, nullable=False)
+        subtitle = db.Column(db.String(250), nullable=False)
+        date = db.Column(db.String(250), nullable=False)
+        body = db.Column(db.Text, nullable=False)
+        img_url = db.Column(db.String(250), nullable=False)
 
-class BlogPost(db.Model):
-    __tablename__ = "blog_posts"
-    id = db.Column(db.Integer, primary_key=True)
-    author = db.Column(db.String(250), nullable=False)
-    title = db.Column(db.String(250), unique=True, nullable=False)
-    subtitle = db.Column(db.String(250), nullable=False)
-    date = db.Column(db.String(250), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    img_url = db.Column(db.String(250), nullable=False)
-db.create_all()
+    # Users
+    class User(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        email = db.Column(db.String(250), nullable=False)
+        password = db.Column(db.String, nullable=False)
+        name = db.Column(db.String(50), nullable=False)
+
+    db.create_all()
+
 
 
 @app.route('/')
 def get_all_posts():
-    posts = BlogPost.query.all()
+    posts = db.session.query(BlogPost).all()
     return render_template("index.html", all_posts=posts)
 
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template("register.html")
+    form = RegisterForm()
+    if form.validate_on_submit():
+        # Add new user to DataBase
+        new_user = User(email=form.data.get('email'),
+                        password=form.data.get('password'),
+                        name=form.data.get('name'))
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('get_all_posts'))
+    return render_template("register.html", form=form)
 
 
 @app.route('/login')
@@ -120,4 +151,4 @@ def delete_post(post_id):
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5001)
