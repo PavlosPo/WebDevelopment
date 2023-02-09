@@ -1,5 +1,5 @@
 import flask
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import CreatePostForm, RegisterForm, LoginForm  # External File
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm  # External File
 from functools import wraps
 from flask_gravatar import Gravatar
 
@@ -36,7 +36,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(user_id)
+    return db.session.query(User).get(user_id)
 
 
 ##CONNECT TO DB
@@ -59,6 +59,9 @@ with app.app_context():
         # The "author" refers to the author property in the BlogPost class.
         posts = db.relationship("BlogPost", back_populates="author")  # Child
 
+        # This will act like a List of Comments in BlogPosts May exist.
+        comments = db.relationship("Comment", back_populates="author")
+
     # Posts
     class BlogPost(db.Model):
         __tablename__ = "blog_posts"
@@ -74,6 +77,14 @@ with app.app_context():
         date = db.Column(db.String(250), nullable=False)
         body = db.Column(db.Text, nullable=False)
         img_url = db.Column(db.String(250), nullable=False)
+
+    # Comments
+    class Comment(db.Model):
+        __tablename__ = "comments"
+        id = db.Column(db.Integer, primary_key=True)
+        author_id = db.Column(db.Integer, ForeignKey("users.id"))
+        author = relationship("User", back_populates="comments")
+        text = db.Column(db.Text, nullable=False)
 
     db.create_all()
 
@@ -141,10 +152,13 @@ def logout():
     return redirect(url_for('get_all_posts'))
 
 
-@app.route("/post/<int:post_id>")
+@app.route("/post/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
-    requested_post = BlogPost.query.get(post_id)
-    return render_template("post.html", post=requested_post)
+    requested_post = db.session.query(BlogPost).get(post_id)
+    form = CommentForm()
+    if form.validate_on_submit():
+        new_comment = 
+    return render_template("post.html", post=requested_post, form=form)
 
 
 @app.route("/about")

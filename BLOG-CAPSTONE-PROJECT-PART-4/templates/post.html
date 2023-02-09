@@ -1,5 +1,5 @@
 {% include "header.html" %}
-
+{% import 'bootstrap/wtf.html' as wtf %}
   <!-- Page Header -->
   <header class="masthead" style="background-image: url('{{post.img_url}}')">
     <div class="overlay"></div>
@@ -18,7 +18,8 @@
     </div>
   </header>
 
-  <!-- Post Content -->
+<body>
+<!-- Post Content -->
   <article>
     <div class="container">
       <div class="row">
@@ -31,6 +32,14 @@
             <a class="btn btn-primary float-right" href="{{url_for('edit_post', post_id=post.id)}}">Edit Post</a>
             </div>
           {% endif %}
+
+
+<!--            Create Comment-->
+          <div>
+            {{ ckeditor.load() }}
+            {{ ckeditor.config(name="comment_text") }}
+            {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+          </div>
 
 
 <!--           Comments Area -->
@@ -48,11 +57,11 @@
               </ul>
             </div>
 
-
           </div>
       </div>
     </div>
   </article>
 
   <hr>
+</body>
 {% include "footer.html" %}
