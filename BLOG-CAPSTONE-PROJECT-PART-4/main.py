@@ -16,6 +16,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 ckeditor = CKEditor(app)
 Bootstrap(app)
+gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
 
 
 # Create admin-only decorator
@@ -60,7 +61,8 @@ with app.app_context():
         posts = db.relationship("BlogPost", back_populates="author")  # Child
 
         # This will act like a List of Comments in BlogPosts May exist.
-        comments = db.relationship("Comment", back_populates="author")
+        # "comment_author" refers to the comment_author property in the Comment class.
+        comments = db.relationship("Comment", back_populates="comment_author")
 
     # Posts
     class BlogPost(db.Model):
@@ -78,15 +80,33 @@ with app.app_context():
         body = db.Column(db.Text, nullable=False)
         img_url = db.Column(db.String(250), nullable=False)
 
+        # Comments of each BlogPost
+        # Child of Parent BlogPost
+        comments = db.relationship('Comment', back_populates='parent_post')
+
     # Comments
     class Comment(db.Model):
         __tablename__ = "comments"
+
         id = db.Column(db.Integer, primary_key=True)
+
+        # Child Relationship
+        # "users.id" The users refers to the tablename of the Users class.
+        # "comments" refers to the comments property in the User class.
         author_id = db.Column(db.Integer, ForeignKey("users.id"))
-        author = relationship("User", back_populates="comments")
+        comment_author = relationship("User", back_populates="comments")
+
+        # Child Relationship
+        # Comment of 'what' BlogPost
+        # BlogPost is the Parent
+        parent_post = db.relationship('BlogPost', back_populates='comments')
+        post_id = db.Column(db.Integer, ForeignKey('blog_posts.id'))
+
         text = db.Column(db.Text, nullable=False)
 
+
     db.create_all()
+
 
 
 ##FLASK ROUTES
@@ -153,12 +173,33 @@ def logout():
 
 
 @app.route("/post/<int:post_id>", methods=["GET", "POST"])
-def show_post(post_id):
+def post_page(post_id):
+
+    # BlogPost
     requested_post = db.session.query(BlogPost).get(post_id)
+
+    # All comments on this BlogPost
+    all_comments = db.session.query(Comment).filter_by(post_id=post_id).all()
+
+    # Create a comment
     form = CommentForm()
     if form.validate_on_submit():
-        new_comment = 
-    return render_template("post.html", post=requested_post, form=form)
+        # If user is not logged in, reroute him to the login page with a flash to log in
+        if not current_user.is_active:
+            flash("Please Log In, to be able to Comment")
+            return redirect(url_for("login"))
+        new_comment = Comment(
+            author_id=current_user.id,
+            comment_author=current_user,
+            parent_post=requested_post,
+            post_id=post_id,
+            text=request.form.get('comment')
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        return redirect(url_for("post_page", post_id=post_id))
+
+    return render_template("post.html", post=requested_post, form=form, all_comments=all_comments)
 
 
 @app.route("/about")

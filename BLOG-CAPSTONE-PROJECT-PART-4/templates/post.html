@@ -43,17 +43,20 @@
 
 
 <!--           Comments Area -->
+
           <div class="col-lg-8 col-md-10 mx-auto comment">
               <ul class="commentList">
+                {% for comment in all_comments: %}
                 <li>
                     <div class="commenterImage">
-                      <img src="https://pbs.twimg.com/profile_images/744849215675838464/IH0FNIXk.jpg"/>
+                      <img src="{{ comment.comment_author.email | gravatar }}"/>
                     </div>
                     <div class="commentText">
-                      <p>Some comment</p>
-                      <span class="date sub-text">comment author name</span>
+                      <p>{{ comment.text | safe }}</p>
+                      <span class="date sub-text">{{ comment.comment_author.name }}</span>
                     </div>
                 </li>
+                {% endfor %}
               </ul>
             </div>
 
