@@ -7,7 +7,7 @@ from wtforms.validators import DataRequired
 import requests
 import os
 
-API_KEY = os.environ["MOVIE_API_KEY"]
+API_KEY = 'a97e7b4324e3a41952e5a62fb05b41f3'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
